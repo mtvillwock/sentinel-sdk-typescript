@@ -1,0 +1,57 @@
+{
+  "name": "@sentinel-ai/sdk",
+  "version": "0.1.0",
+  "description": "Sentinel SDK for Node.js - Cost-aware execution runtime for LLM workflows",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "sentinel",
+    "llm",
+    "ai",
+    "cost-tracking",
+    "observability",
+    "anthropic",
+    "openai",
+    "budget-enforcement"
+  ],
+  "author": "Sentinel AI",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sentinel-ai/sentinel-sdk-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sentinel-ai/sentinel-sdk-node/issues"
+  },
+  "homepage": "https://github.com/sentinel-ai/sentinel-sdk-node#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
