@@ -41,7 +41,8 @@
   },
   "homepage": "https://github.com/sentinel-ai/sentinel-sdk-node#readme",
   "devDependencies": {
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20.11.24",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
