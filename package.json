@@ -1,5 +1,5 @@
 {
-  "name": "@sentinel-ai/sdk",
+  "name": "@sentinel/typescript-sdk",
   "version": "0.1.0",
   "description": "Sentinel SDK for Node.js - Cost-aware execution runtime for LLM workflows",
   "main": "dist/index.js",
@@ -12,6 +12,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "prepare": "npm run build",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts",
