@@ -281,9 +281,17 @@ export class Sentinel {
 
     // Simplified pricing (cents per 1K tokens)
     const pricing: Record<string, { input: number; output: number }> = {
+      // Anthropic models
       'claude-sonnet-4-20250514': { input: 0.3, output: 1.5 },
       'claude-haiku-4-20250514': { input: 0.025, output: 0.125 },
       'claude-opus-4-20250514': { input: 1.5, output: 7.5 },
+
+      // Cloudflare Workers AI models ($0.20/M tokens blended)
+      // Using same rate for input/output since Cloudflare charges blended
+      '@cf/meta/llama-3.1-8b-instruct': { input: 0.02, output: 0.02 },
+      '@cf/meta/llama-2-7b-chat-int8': { input: 0.02, output: 0.02 },
+      '@cf/mistral/mistral-7b-instruct-v0.1': { input: 0.02, output: 0.02 },
+      '@cf/qwen/qwen1.5-7b-chat-awq': { input: 0.02, output: 0.02 },
     };
 
     const rates = pricing[model] || { input: 0.3, output: 1.5 };
@@ -312,6 +320,8 @@ export class Sentinel {
           output_tokens: result.usage.completion_tokens,
         };
       }
+
+      // TODO: do we need something here for Cloudflare or is that handled in calculateCost?
 
       return {};
     } catch {
@@ -421,6 +431,24 @@ export class Sentinel {
  */
 export function createSentinel(config: SentinelConfig): Sentinel {
   return new Sentinel(config);
+}
+
+/**
+ * Estimate token count from text
+ * Rule of thumb: 1 token ≈ 4 characters
+ *
+ * @param text - Text to estimate tokens for
+ * @returns Estimated token count
+ *
+ * @example
+ * ```typescript
+ * const tokens = estimateTokens("Hello world");
+ * // returns 3
+ * ```
+ */
+export function estimateTokens(text: string): number {
+  if (!text) return 0;
+  return Math.ceil(text.length / 4);
 }
 
 // Default export
