@@ -1,4 +1,12 @@
 "use strict";
+/**
+ * Sentinel SDK for Node.js/TypeScript
+ *
+ * Cost-aware execution runtime for LLM workflows.
+ * Tracks spend, enforces budgets, and sends telemetry to your Sentinel dashboard.
+ *
+ * @packageDocumentation
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Sentinel = exports.BudgetExceededError = exports.SentinelError = void 0;
 exports.createSentinel = createSentinel;
@@ -19,6 +27,27 @@ class BudgetExceededError extends SentinelError {
     }
 }
 exports.BudgetExceededError = BudgetExceededError;
+/**
+ * Sentinel SDK client
+ *
+ * @example
+ * ```typescript
+ * const sentinel = new Sentinel({
+ *   apiKey: 'sk_...',
+ *   source: 'my-app'
+ * });
+ *
+ * const result = await sentinel.track(
+ *   async () => {
+ *     return await anthropic.messages.create({...});
+ *   },
+ *   {
+ *     model: 'claude-sonnet-4-20250514',
+ *     budget_cents: 50
+ *   }
+ * );
+ * ```
+ */
 class Sentinel {
     constructor(config) {
         this.config = {
@@ -36,10 +65,27 @@ class Sentinel {
             console.warn('Sentinel: API key should start with sk_');
         }
     }
+    /**
+     * Track an LLM call with cost tracking and budget enforcement
+     *
+     * @param fn - Async function that executes the LLM call
+     * @param opts - Tracking options
+     * @returns Result from the tracked function
+     * @throws {BudgetExceededError} When budget is exceeded and enforce_mode is 'reject'
+     *
+     * @example
+     * ```typescript
+     * const result = await sentinel.track(
+     *   async () => anthropic.messages.create({...}),
+     *   { model: 'claude-sonnet-4', budget_cents: 50 }
+     * );
+     * ```
+     */
     async track(fn, opts) {
         if (!this.config.enabled) {
             return await fn();
         }
+        // Generate request_id if not provided
         const trackOpts = {
             ...opts,
             request_id: opts.request_id || this.generateRequestId(),
@@ -55,12 +101,20 @@ class Sentinel {
             .join('');
         return `req_${hex}`;
     }
+    /**
+     * Configure the Sentinel client (updates existing config)
+     *
+     * @param config - Partial configuration to update
+     */
     configure(config) {
         this.config = {
             ...this.config,
             ...config,
         };
     }
+    /**
+     * Get current configuration
+     */
     getConfig() {
         return { ...this.config };
     }
@@ -122,10 +176,14 @@ class Sentinel {
     calculateCost(model, input_tokens, output_tokens) {
         if (!input_tokens || !output_tokens)
             return undefined;
+        // Simplified pricing (cents per 1K tokens)
         const pricing = {
+            // Anthropic models
             'claude-sonnet-4-20250514': { input: 0.3, output: 1.5 },
             'claude-haiku-4-20250514': { input: 0.025, output: 0.125 },
             'claude-opus-4-20250514': { input: 1.5, output: 7.5 },
+            // Cloudflare Workers AI models ($0.20/M tokens blended)
+            // Using same rate for input/output since Cloudflare charges blended
             '@cf/meta/llama-3.1-8b-instruct': { input: 0.02, output: 0.02 },
             '@cf/meta/llama-2-7b-chat-int8': { input: 0.02, output: 0.02 },
             '@cf/mistral/mistral-7b-instruct-v0.1': { input: 0.02, output: 0.02 },
@@ -136,18 +194,21 @@ class Sentinel {
     }
     extractTokens(result) {
         try {
+            // Handle Anthropic SDK response shape
             if (result?.usage) {
                 return {
                     input_tokens: result.usage.input_tokens,
                     output_tokens: result.usage.output_tokens,
                 };
             }
+            // Handle OpenAI SDK response shape
             if (result?.usage?.prompt_tokens) {
                 return {
                     input_tokens: result.usage.prompt_tokens,
                     output_tokens: result.usage.completion_tokens,
                 };
             }
+            // TODO: do we need something here for Cloudflare or is that handled in calculateCost?
             return {};
         }
         catch {
@@ -163,6 +224,7 @@ class Sentinel {
         if (opts.tier) {
             metadata.tier = opts.tier;
         }
+        // Ensure workflow_key is set (use tier as fallback)
         if (!metadata.workflow_key && opts.tier) {
             metadata.workflow_key = opts.tier;
         }
@@ -170,6 +232,7 @@ class Sentinel {
     }
     async sendEvent(event) {
         if (this.config.async) {
+            // Fire and forget
             this.sendEventSync(event).catch((error) => {
                 console.error('Sentinel: Failed to send event', error);
             });
@@ -217,13 +280,41 @@ class Sentinel {
 exports.Sentinel = Sentinel;
 Sentinel.DEFAULT_ENDPOINT = 'https://sentinel-overwatch.fly.dev';
 Sentinel.SDK_VERSION = '0.1.0';
+/**
+ * Create a Sentinel instance with the given configuration
+ *
+ * @param config - Sentinel configuration
+ * @returns Sentinel instance
+ *
+ * @example
+ * ```typescript
+ * const sentinel = createSentinel({
+ *   apiKey: process.env.SENTINEL_API_KEY!,
+ *   source: 'my-app'
+ * });
+ * ```
+ */
 function createSentinel(config) {
     return new Sentinel(config);
 }
+/**
+ * Estimate token count from text
+ * Rule of thumb: 1 token ≈ 4 characters
+ *
+ * @param text - Text to estimate tokens for
+ * @returns Estimated token count
+ *
+ * @example
+ * ```typescript
+ * const tokens = estimateTokens("Hello world");
+ * // returns 3
+ * ```
+ */
 function estimateTokens(text) {
     if (!text)
         return 0;
     return Math.ceil(text.length / 4);
 }
+// Default export
 exports.default = Sentinel;
 //# sourceMappingURL=index.js.map
