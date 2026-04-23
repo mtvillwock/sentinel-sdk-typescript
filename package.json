@@ -4,6 +4,13 @@
   "description": "Sentinel SDK for Node.js - Cost-aware execution runtime for LLM workflows",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist",
     "README.md",
