@@ -1,6 +1,4 @@
-/// <reference types="jest" />
-
-import { Sentinel } from './index';
+import { Sentinel } from '../src/index';
 
 // Mock fetch globally
 globalThis.fetch = jest.fn();
