@@ -1,0 +1,7 @@
+# These are integration/E2E scripts that hit live services. 
+# They shouldn't run in your unit test suite at all (they need real API keys, make real network calls, cost real money).
+
+# Run the scripts manually when you want to hit live services:
+
+npx ts-node src/integration.script.ts
+npx ts-node src/sdk_e2e.script.ts
